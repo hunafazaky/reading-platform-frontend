@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardAction,
@@ -16,9 +17,16 @@ import {
 } from "@/components/ui/button-group";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
-import { PenNibIcon, ArticleIcon } from "@phosphor-icons/react";
+import {
+  PenNibIcon,
+  ArticleIcon,
+  BookmarkSimpleIcon,
+} from "@phosphor-icons/react";
 import { DialogDeleteWork } from "@/components/dialog-deletework";
 import { Work } from "@/types";
+import { getWorkUrl, cn } from "@/lib/utils";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 export function CardWork({ work: rawWork }: { work: any }) {
   const user = useAuthStore((state) => state.user);
@@ -34,14 +42,39 @@ export function CardWork({ work: rawWork }: { work: any }) {
   const categories = work?.categories || [];
   const workId = work?.id || "";
 
-  const getWorkUrl = (point: string, rawTitle?: string, id?: string) => {
-    const safeTitle = typeof rawTitle === "string" ? rawTitle : "";
-    const cleanedTitle = safeTitle
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-");
-    return `/${cleanedTitle || "work"}-${id || ""}/${point}`;
+  const initialBookmarked = Boolean(
+    work?.bookmarked ?? rawWork?.bookmarked ?? false,
+  );
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(initialBookmarked);
+  const [isToggling, setIsToggling] = useState(false);
+
+  useEffect(() => {
+    setIsBookmarked(Boolean(work?.bookmarked ?? rawWork?.bookmarked ?? false));
+  }, [work?.bookmarked, rawWork?.bookmarked]);
+
+  const handleToggleBookmark = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!workId || isToggling) return;
+
+    const previousState = isBookmarked;
+    const nextState = !previousState;
+
+    setIsBookmarked(nextState);
+    setIsToggling(true);
+
+    try {
+      const response = await api.post("/bookmarks/toggle", { workId });
+      if (response.data && typeof response.data.bookmarked === "boolean") {
+        setIsBookmarked(response.data.bookmarked);
+      }
+    } catch (error) {
+      setIsBookmarked(previousState);
+      toast.error("Failed to update bookmark status.");
+    } finally {
+      setIsToggling(false);
+    }
   };
 
   return (
@@ -65,7 +98,24 @@ export function CardWork({ work: rawWork }: { work: any }) {
             </CardDescription>
           )}
         </div>
-        <CardAction>Save</CardAction>
+        <CardAction>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 rounded-full"
+            onClick={handleToggleBookmark}
+            disabled={isToggling}
+            title={isBookmarked ? "Remove Bookmark" : "Save Bookmark"}
+          >
+            <BookmarkSimpleIcon
+              weight={isBookmarked ? "fill" : "regular"}
+              className={cn(
+                "size-5 transition-colors",
+                isBookmarked ? "text-amber-500" : "text-muted-foreground",
+              )}
+            />
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent className="grow">
         <p className="line-clamp-3">{body}</p>

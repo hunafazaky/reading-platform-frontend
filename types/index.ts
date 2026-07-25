@@ -19,6 +19,7 @@ export interface Work {
   writer: Writer;
   reader_count?: number;
   rating_count?: number;
+  bookmarked?: boolean;
 }
 
 export interface CreateWorkPayload {

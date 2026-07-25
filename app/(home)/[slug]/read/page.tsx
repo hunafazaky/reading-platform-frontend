@@ -1,6 +1,8 @@
 import PageClient from "./page-client";
 import axios from "axios";
 import { notFound } from "next/navigation";
+import { extractWorkId } from "@/lib/utils";
+import { getServerApi } from "@/lib/api-server";
 
 interface PageProps {
   params: Promise<{
@@ -9,23 +11,31 @@ interface PageProps {
 }
 
 async function getWorkData(id: string) {
-  const baseUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
   try {
-    const response = await axios.get(`${baseUrl}/api/works/${id}`);
-    return response.data;
+    const api = await getServerApi();
+    const response = await api.get(`/works/${id}`);
+    const data = response.data;
+    // Handle response if wrapped in { work: ... } or { data: ... }
+    return data?.work || data?.data || data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return null;
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `[Read Page] Failed to fetch work (id: "${id}", status: ${error.response?.status}):`,
+        error.response?.data || error.message,
+      );
+      if (error.response?.status === 404) {
+        return null;
+      }
+    } else {
+      console.error("[Read Page] Unexpected error fetching work data:", error);
     }
-    console.error("Failed to fetch work data in Read page:", error);
     return null;
   }
 }
 
 export default async function Read({ params }: PageProps) {
   const { slug } = await params;
-  const slugParts = slug.split("-");
-  const workId = slugParts.pop() || "";
+  const workId = extractWorkId(slug);
 
   if (!workId) {
     notFound();

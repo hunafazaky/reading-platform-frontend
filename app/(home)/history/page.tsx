@@ -9,6 +9,7 @@ export default function HistoryPage() {
     queryKey: ["history"],
     queryFn: async () => {
       const response = await api.get("/history");
+      console.log(response.data)
       return response.data;
     },
   });
