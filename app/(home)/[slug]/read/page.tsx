@@ -1,5 +1,6 @@
 import PageClient from "./page-client";
 import axios from "axios";
+import { notFound } from "next/navigation";
 
 interface PageProps {
   params: Promise<{
@@ -7,30 +8,36 @@ interface PageProps {
   }>;
 }
 
-// Fungsi pengambilan data langsung di sisi server
 async function getWorkData(id: string) {
-  // Gunakan variabel PRIVATE (tanpa NEXT_PUBLIC_) agar URL backend aman
-  const baseUrl = process.env.BACKEND_API_URL;
-
-  const response = await axios.get(`${baseUrl}/api/works/${id}`);
-  return response.data;
+  const baseUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
+  try {
+    const response = await axios.get(`${baseUrl}/api/works/${id}`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+    console.error("Failed to fetch work data in Read page:", error);
+    return null;
+  }
 }
 
 export default async function Read({ params }: PageProps) {
   const { slug } = await params;
   const slugParts = slug.split("-");
-  const workId = slugParts.pop() || "not-found";
+  const workId = slugParts.pop() || "";
 
-  if (workId === "not-found") {
-    throw new Error("ID Karya tidak valid atau tidak ditemukan.");
+  if (!workId) {
+    notFound();
   }
 
-  // Fetch data di server (Next.js akan menampilkan loading.tsx selama proses ini)
   const data = await getWorkData(workId);
+  if (!data) {
+    notFound();
+  }
 
   return (
     <div>
-      {/* Oper data yang sudah matang ke component pembantu */}
       <PageClient data={data} />
     </div>
   );

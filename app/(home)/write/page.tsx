@@ -121,11 +121,6 @@ export default function WritePage() {
               // Jika SelectCategories mendukung prop disabled, tambahkan: disabled={mutation.isPending}
             />
           </Field>
-
-          {/* Temp debug */}
-          <p className="text-xs text-gray-400">
-            State selectedCategories: {JSON.stringify(selectedCategories)}
-          </p>
           
           <Field orientation="horizontal">
             <Button type="submit" disabled={mutation.isPending}>

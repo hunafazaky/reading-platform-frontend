@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Card,
   CardAction,
@@ -13,46 +14,43 @@ import {
   ButtonGroup,
   ButtonGroupSeparator,
 } from "@/components/ui/button-group";
-// import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
-
-// Icon
 import { PenNibIcon, ArticleIcon } from "@phosphor-icons/react";
-
 import { DialogDeleteWork } from "@/components/dialog-deletework";
+import { Work } from "@/types";
 
-interface Work {
-  id: string;
-  title: string;
-  body: string;
-  categories: string[];
-  writer: {
-    id: string;
-  };
-}
+export function CardWork({ work: rawWork }: { work: any }) {
+  const user = useAuthStore((state) => state.user);
 
-export function CardWork({ work }: { work: Work }) {
-  const user = useAuthStore((state) => state.user) || {
-    id: null,
-  };
-  // const router = useRouter();
-  const getWorkUrl = (point: string, title: string, id: string) => {
-    const cleanedTitle = title
+  // Jika item berbentuk { id: "hist-id", work: { id: "work-id", title: "...", ... } }
+  const work: Work =
+    rawWork && typeof rawWork === "object" && "work" in rawWork && rawWork.work
+      ? rawWork.work
+      : rawWork || {};
+
+  const title = work?.title || "Untitled";
+  const body = work?.body || "";
+  const categories = work?.categories || [];
+  const workId = work?.id || "";
+
+  const getWorkUrl = (point: string, rawTitle?: string, id?: string) => {
+    const safeTitle = typeof rawTitle === "string" ? rawTitle : "";
+    const cleanedTitle = safeTitle
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .trim()
       .replace(/\s+/g, "-");
-    return `/${cleanedTitle}-${id}/${point}`;
+    return `/${cleanedTitle || "work"}-${id || ""}/${point}`;
   };
 
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
-        <CardTitle className="truncate">{work.title}</CardTitle>
-        <div className="flex gap-2">
-          {work.categories.length > 0 ? (
-            work.categories.map((category: string, index: number) => (
+        <CardTitle className="truncate">{title}</CardTitle>
+        <div className="flex gap-2 flex-wrap">
+          {categories.length > 0 ? (
+            categories.map((category: string, index: number) => (
               <CardDescription key={index}>
                 <Button variant="link" className="p-0">
                   #{category}
@@ -70,16 +68,16 @@ export function CardWork({ work }: { work: Work }) {
         <CardAction>Save</CardAction>
       </CardHeader>
       <CardContent className="grow">
-        <p className="line-clamp-3">{work.body}</p>
+        <p className="line-clamp-3">{body}</p>
       </CardContent>
       <CardFooter>
         <Button asChild size="sm" variant="ghost" className="text-lime-600">
-          <Link href={getWorkUrl("read", work.title, work.id)}>
+          <Link href={getWorkUrl("read", title, workId)}>
             <ArticleIcon />
             Read
           </Link>
         </Button>
-        {user.id === work.writer.id && (
+        {user?.id && work?.writer?.id && user.id === work.writer.id && (
           <ButtonGroup aria-label="Button group" className="ml-auto">
             <Button
               asChild
@@ -87,17 +85,13 @@ export function CardWork({ work }: { work: Work }) {
               variant="ghost"
               className="text-amber-400"
             >
-              <Link href={getWorkUrl("edit", work.title, work.id)}>
+              <Link href={getWorkUrl("edit", title, workId)}>
                 <PenNibIcon />
                 Edit
               </Link>
             </Button>
             <ButtonGroupSeparator />
-            <DialogDeleteWork id={work.id} />
-            {/* <Button size="sm" variant="ghost" className="text-amber-600">
-              <TrashIcon />
-              Delete
-            </Button> */}
+            <DialogDeleteWork id={workId} />
           </ButtonGroup>
         )}
       </CardFooter>

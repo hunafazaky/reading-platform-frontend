@@ -21,15 +21,14 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 
-// START
-export default function Authentication() {
-  interface UserDataProps {
-    email?: string;
-    pen_name?: string;
-    password?: string;
-    password2?: string;
-  }
+interface UserDataProps {
+  email?: string;
+  pen_name?: string;
+  password?: string;
+  password2?: string;
+}
 
+export default function Authentication() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isSignIn, setIsSignIn] = useState(true);
@@ -52,8 +51,8 @@ export default function Authentication() {
   };
 
   const handleErrorMessage = (error: AxiosError) => {
-    let message;
-    switch (error.status) {
+    let message: string;
+    switch (error.response?.status || error.status) {
       case 401:
         message = "Email or Password incorrect.";
         break;
@@ -92,6 +91,7 @@ export default function Authentication() {
 
     if (userData.password !== userData.password2) {
       setStatus("Password and Retype Password are different.");
+      setLoading(false);
       return;
     }
 
@@ -107,7 +107,6 @@ export default function Authentication() {
 
       router.push("/");
     } catch (error) {
-      // console.error("Sign Up failed:", error);
       handleErrorMessage(error as AxiosError);
     } finally {
       setLoading(false);
@@ -150,12 +149,6 @@ export default function Authentication() {
                   <div className="grid gap-2">
                     <div className="flex items-center">
                       <Label htmlFor="password">Password</Label>
-                      {/* <a
-                        href="#"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline opacity-70"
-                      >
-                        Forgot your password?
-                      </a> */}
                     </div>
                     <Input
                       id="password"
@@ -170,7 +163,7 @@ export default function Authentication() {
               ) : (
                 <section className="grid gap-6">
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Pen Name</Label>
+                    <Label htmlFor="pen_name">Pen Name</Label>
                     <Input
                       id="pen_name"
                       type="text"
@@ -209,7 +202,7 @@ export default function Authentication() {
                         Minimum 8 characters, including at least 1 uppercase
                         letter and 1 number.
                       </p>
-                      <p className="text-red-400 my-2">{status}</p>
+                      {status && <p className="text-red-400 my-2">{status}</p>}
                     </div>
                   </div>
                 </section>
@@ -224,7 +217,10 @@ export default function Authentication() {
               Or
               <Button
                 variant="link"
-                onClick={() => setIsSignIn((prev) => !prev)}
+                onClick={() => {
+                  setIsSignIn((prev) => !prev);
+                  setStatus("");
+                }}
               >
                 {isSignIn ? "Sign Up" : "Sign In"}
               </Button>

@@ -1,12 +1,12 @@
-// src/services/workService.ts
 import { api } from "@/lib/api";
+import { CreateWorkPayload, Work } from "@/types";
 
-export const getWorks = async () => {
+export const getWorks = async (): Promise<Work[]> => {
   const response = await api.get("/works");
-  return response.data; // Mengembalikan data array dari backend
+  return response.data;
 };
 
-export const postWork = async (req: Request) => {
-  const response = await api.post("/works", req.body);
-  return response.data; // Mengembalikan data array dari backend
+export const postWork = async (payload: CreateWorkPayload) => {
+  const response = await api.post("/works", payload);
+  return response.data;
 };

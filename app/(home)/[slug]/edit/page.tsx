@@ -1,15 +1,20 @@
-// app/works/[slug]/edit/page.tsx
 import EditWorkClient from "./page-client";
 import axios from "axios";
+import { notFound } from "next/navigation";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 async function getWorkData(id: string) {
-  const baseUrl = process.env.BACKEND_API_URL;
-  const res = await axios.get(`${baseUrl}/api/works/${id}`);
-  return res.data;
+  const baseUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
+  try {
+    const res = await axios.get(`${baseUrl}/api/works/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch work data in Edit page:", error);
+    return null;
+  }
 }
 
 export default async function EditPage({ params }: PageProps) {
@@ -17,9 +22,14 @@ export default async function EditPage({ params }: PageProps) {
   const slugParts = slug.split("-");
   const workId = slugParts.pop() || "";
 
-  // 1. Fetch data saat ini langsung dari server (cepat & tanpa flicker loading)
-  const currentWork = await getWorkData(workId);
+  if (!workId) {
+    notFound();
+  }
 
-  // 2. Lempar datanya ke form TanStack Query kita
+  const currentWork = await getWorkData(workId);
+  if (!currentWork) {
+    notFound();
+  }
+
   return <EditWorkClient initialData={currentWork} />;
 }

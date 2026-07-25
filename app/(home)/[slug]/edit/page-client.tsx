@@ -138,11 +138,6 @@ export default function EditWorkClient({ initialData }: EditWorkClientProps) {
               onChange={setSelectedCategories}
             />
           </Field>
-
-          {/* Temp debug */}
-          <p className="text-xs text-gray-400">
-            State selectedCategories: {JSON.stringify(selectedCategories)}
-          </p>
           <Field orientation="horizontal">
             {/* Tombol otomatis disable & ganti teks saat proses pengiriman */}
             <Button type="submit" disabled={mutation.isPending}>
