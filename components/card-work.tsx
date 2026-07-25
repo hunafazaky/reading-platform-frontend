@@ -27,9 +27,11 @@ import { Work } from "@/types";
 import { getWorkUrl, cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CardWork({ work: rawWork }: { work: any }) {
   const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   // Jika item berbentuk { id: "hist-id", work: { id: "work-id", title: "...", ... } }
   const work: Work =
@@ -61,14 +63,38 @@ export function CardWork({ work: rawWork }: { work: any }) {
     const previousState = isBookmarked;
     const nextState = !previousState;
 
+    // Optimistic update: langsung ubah state lokal
     setIsBookmarked(nextState);
     setIsToggling(true);
 
     try {
       const response = await api.post("/bookmarks/toggle", { workId });
-      if (response.data && typeof response.data.bookmarked === "boolean") {
-        setIsBookmarked(response.data.bookmarked);
-      }
+      const confirmedBookmarked: boolean =
+        typeof response.data?.bookmarked === "boolean"
+          ? response.data.bookmarked
+          : nextState;
+
+      // Sinkronkan state lokal dengan respons backend
+      setIsBookmarked(confirmedBookmarked);
+
+      // Update cache "works" (timeline) secara langsung tanpa refetch penuh
+      queryClient.setQueryData(["works"], (old: any) => {
+        if (!old?.works) return old;
+        return {
+          ...old,
+          works: old.works.map((w: any) => {
+            const wId = w?.id || w?.work?.id;
+            if (wId !== workId) return w;
+            if (w?.work) {
+              return { ...w, work: { ...w.work, bookmarked: confirmedBookmarked } };
+            }
+            return { ...w, bookmarked: confirmedBookmarked };
+          }),
+        };
+      });
+
+      // Invalidate cache "bookmarks" agar list bookmark sinkron
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     } catch (error) {
       setIsBookmarked(previousState);
       toast.error("Failed to update bookmark status.");
