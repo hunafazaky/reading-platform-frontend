@@ -1,78 +1,192 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { useAuthStore } from "@/store/authStore";
+
+// import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
-  SidebarMenuButton,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { BooksIcon } from "@phosphor-icons/react";
-import { History, ListStart, Bookmark } from "lucide-react";
+import {
+  House,
+  RotateCcwClock,
+  FolderBookmark,
+  Star,
+  UserRoundPen,
+  CameraIcon,
+  FileTextIcon,
+  Settings2Icon,
+  CircleHelpIcon,
+  SearchIcon,
+  DatabaseIcon,
+  FileChartColumnIcon,
+  FileIcon,
+  SquareLibrary,
+  // RotateCcwClock
+} from "lucide-react";
 
-const brand = {
-  name: "Reading Platform",
-  logo: <BooksIcon />,
-  plan: "Social and Entertainment",
-};
+// My Import
+// import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const user = useAuthStore((state) => state.user);
-
-  const userData = {
-    pen_name: user?.pen_name || "Guest",
-    email: user?.email || "u@example.com",
-    photo: user?.photo || "/dragon-book.avif",
-  };
-
-  const navItems = [
+const data = {
+  user: {
+    id: "001",
+    email: "guest@example.com",
+    pen_name: "Guest",
+    photo: "/globe.svg",
+    bio: "Guest Account, Limited Access.",
+    createdAt: "",
+    updatedAt: "",
+  },
+  navMain: [
     {
-      title: "Timeline",
-      url: "/timeline",
-      icon: ListStart,
-    },
-    {
-      title: "Bookmarks",
-      url: "/bookmarks",
-      icon: Bookmark,
+      title: "Home",
+      url: "/home",
+      icon: <House />,
     },
     {
       title: "History",
       url: "/history",
-      icon: History,
+      icon: <RotateCcwClock />,
     },
-  ];
+    {
+      title: "Bookmarked",
+      url: "/bookmarked",
+      icon: <FolderBookmark />,
+    },
+    {
+      title: "Scored",
+      url: "/scored",
+      icon: <Star />,
+    },
+    {
+      title: "Published",
+      url: "/published",
+      icon: <UserRoundPen />,
+    },
+  ],
+  navClouds: [
+    {
+      title: "Capture",
+      icon: <CameraIcon />,
+      isActive: true,
+      url: "#",
+      items: [
+        {
+          title: "Active Proposals",
+          url: "#",
+        },
+        {
+          title: "Archived",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Proposal",
+      icon: <FileTextIcon />,
+      url: "#",
+      items: [
+        {
+          title: "Active Proposals",
+          url: "#",
+        },
+        {
+          title: "Archived",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Prompts",
+      icon: <FileTextIcon />,
+      url: "#",
+      items: [
+        {
+          title: "Active Proposals",
+          url: "#",
+        },
+        {
+          title: "Archived",
+          url: "#",
+        },
+      ],
+    },
+  ],
+  navSecondary: [
+    {
+      title: "Settings",
+      url: "#",
+      icon: <Settings2Icon />,
+    },
+    {
+      title: "Get Help",
+      url: "#",
+      icon: <CircleHelpIcon />,
+    },
+    {
+      title: "Search",
+      url: "#",
+      icon: <SearchIcon />,
+    },
+  ],
+  documents: [
+    {
+      name: "Data Library",
+      url: "#",
+      icon: <DatabaseIcon />,
+    },
+    {
+      name: "Reports",
+      url: "#",
+      icon: <FileChartColumnIcon />,
+    },
+    {
+      name: "Word Assistant",
+      url: "#",
+      icon: <FileIcon />,
+    },
+  ],
+};
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // My Const
+  // const { user, isLoading, signout } = useAuth();
 
   return (
-    <Sidebar className="border-r-0" {...props}>
+    <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
-        <SidebarMenuButton
-          size="lg"
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-        >
-          <Link href="/" className="flex">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground mr-2">
-              {brand.logo}
-            </div>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{brand.name}</span>
-              <span className="truncate text-xs">{brand.plan}</span>
-            </div>
-          </Link>
-        </SidebarMenuButton>
-        <NavMain items={navItems} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Link href={"/home"}>
+              <SidebarMenuButton
+                className="data-[slot=sidebar-menu-button]:p-1.5!"
+              >
+                <SquareLibrary className="size-5!" />
+                <span className="text-base font-semibold">
+                  Reading Platform
+                </span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent />
+      <SidebarContent>
+        <NavMain items={data.navMain} />
+        {/* <NavDocuments items={data.documents} /> */}
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userData} />
+        <NavUser />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

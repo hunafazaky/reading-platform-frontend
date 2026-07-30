@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/components/auth-provider";
-import { TanstackProvider } from "@/components/tanstack-provider";
-import { RefreshLoader } from "@/components/refresh-loader";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "700"],
-});
+// My Import
+import { AuthProvider } from "@/context/AuthContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Reading Platform",
-  description: "Centralized App for Readers",
+  title: "My App",
+  description: "Built by Hunafa Zaky",
 };
 
 export default function RootLayout({
@@ -35,30 +31,20 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="id"
-      suppressHydrationWarning
+      lang="en"
       className={cn(
         "h-full",
-        inter.variable,
+        "antialiased",
         geistSans.variable,
         geistMono.variable,
         "font-sans",
-        "antialiased",
+        outfit.variable,
       )}
     >
-      <head />
       <body className="min-h-full flex flex-col">
-        <RefreshLoader />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-            <TanstackProvider>{children}</TanstackProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,50 +1,71 @@
-import axios from "axios";
-import { useAuthStore } from "@/store/authStore";
+import { ApiError, ApiErrorResponse } from "@/types/api";
 
-export const api = axios.create({
-  baseURL: "/api",
-  withCredentials: true,
-});
+// Base URL comes from an environment variable so it's easy to change
+// between local development and production without touching the code.
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-api.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().accessToken;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+if (!API_URL) {
+  // This only throws during development if someone forgets to set up .env.local.
+  // It's better to fail loudly here than to get confusing "fetch failed" errors later.
+  throw new Error(
+    "NEXT_PUBLIC_API_URL is not set. Copy .env.local.example to .env.local and fill it in.",
+  );
+}
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+interface ApiFetchOptions {
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  // The request body, as a plain JS object. We stringify it for you.
+  body?: unknown;
+  // The current access token, if the user is signed in and this route needs auth.
+  accessToken?: string | null;
+}
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+// A single helper function used for every request to the backend.
+//
+// It takes care of:
+// - Building the full URL (API_URL + path)
+// - Sending cookies (needed for the refresh token cookie)
+// - Setting JSON headers and stringifying the body
+// - Attaching the "Authorization: Bearer <token>" header when we have one
+// - Reading the JSON response
+// - Throwing a typed ApiError when the response is not ok (status >= 400)
+export async function apiFetch<TResponse>(
+  path: string,
+  options: ApiFetchOptions = {},
+): Promise<TResponse> {
+  const { method = "GET", body, accessToken } = options;
 
-      try {
-        const response = await axios.post(
-          `/api/users/refresh`,
-          {},
-          { withCredentials: true },
-        );
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
 
-        const { accessToken } = response.data;
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
 
-        useAuthStore
-          .getState()
-          .setAuth(accessToken, useAuthStore.getState().user!);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        useAuthStore.getState().clearAuth();
-        return Promise.reject(refreshError);
-      }
-    }
+  const response = await fetch(`${API_URL}${path}`, {
+    method,
+    headers,
+    // "include" tells the browser to send/receive cookies even though
+    // the frontend and backend are on different origins. This is required
+    // for the HttpOnly refresh token cookie to work.
+    credentials: "include",
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
 
-    return Promise.reject(error);
-  },
-);
+  // The backend always returns JSON, even for errors, so we can safely parse it.
+  // (If parsing fails, something is very wrong — e.g. the API is down — and we
+  // let that error bubble up naturally.)
+  const data = await response.json();
+
+  if (!response.ok) {
+    const errorData = data as ApiErrorResponse;
+    throw new ApiError(
+      errorData.message || "Something went wrong. Please try again.",
+      response.status,
+      errorData.details,
+    );
+  }
+
+  return data as TResponse;
+}
