@@ -8,7 +8,7 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
+  // FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -63,14 +63,15 @@ export function SigninForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+      <h1 className="text-center md:text-6xl text-4xl">Reading Platform</h1>
+      <Card className="overflow-hidden p-0 z-10">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-balance text-muted-foreground">
-                  Sign in to your Acme Inc account
+                  Sign in to your account
                 </p>
               </div>
               <Field>
@@ -83,7 +84,7 @@ export function SigninForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="example@mail.com"
+                  placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -97,12 +98,12 @@ export function SigninForm({
                       <span className="text-destructive">*</span>
                     </div>
                   </FieldLabel>
-                  <Link
+                  {/* <Link
                     href="#"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-                  </Link>
+                  </Link> */}
                 </div>
                 <Input
                   id="password"
@@ -123,7 +124,7 @@ export function SigninForm({
                   {isSubmitting ? "Signing in..." : "Sign in"}
                 </Button>
               </Field>
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
               <Field className="grid grid-cols-3 gap-4">
@@ -154,15 +155,16 @@ export function SigninForm({
                   </svg>
                   <span className="sr-only">Sign in with Meta</span>
                 </Button>
-              </Field>
+              </Field> */}
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <Link href="/auth/signup">Sign up</Link>
+                Don&apos;t have an account?{" "}
+                <Link href="/auth/signup">Sign up</Link>
               </FieldDescription>
             </FieldGroup>
           </form>
           <div className="relative hidden bg-muted md:block">
             <Image
-              src="/file.svg"
+              src="/book-image.svg"
               width={100}
               height={100}
               alt="Image"
@@ -171,11 +173,11 @@ export function SigninForm({
           </div>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
+      {/* <FieldDescription className="px-6 text-center">
         By clicking continue, you agree to our{" "}
         <Link href="#">Terms of Service</Link> and{" "}
         <Link href="#">Privacy Policy</Link>.
-      </FieldDescription>
+      </FieldDescription> */}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
+  // FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -88,6 +88,7 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <h1 className="text-center md:text-6xl text-4xl">Reading Platform</h1>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
@@ -107,7 +108,7 @@ export function SignupForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="example@mail.com"
+                  placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -184,7 +185,8 @@ export function SignupForm({
                   {isSubmitting ? "Signing up..." : "Sign up"}
                 </Button>
               </Field>
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              
+              {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
               <Field className="grid grid-cols-3 gap-4">
@@ -215,7 +217,8 @@ export function SignupForm({
                   </svg>
                   <span className="sr-only">Sign up with Meta</span>
                 </Button>
-              </Field>
+              </Field> */}
+
               <FieldDescription className="text-center">
                 Already have an account? <Link href="/auth/signin">Sign in</Link>
               </FieldDescription>
@@ -223,7 +226,7 @@ export function SignupForm({
           </form>
           <div className="relative hidden bg-muted md:block">
             <Image
-              src="/file.svg"
+              src="/book-image.svg"
               width={100}
               height={100}
               alt="Image"
@@ -232,11 +235,11 @@ export function SignupForm({
           </div>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
+      {/* <FieldDescription className="px-6 text-center">
         By clicking continue, you agree to our{" "}
         <Link href="#">Terms of Service</Link> and{" "}
         <Link href="#">Privacy Policy</Link>.
-      </FieldDescription>
+      </FieldDescription> */}
     </div>
   );
 }
