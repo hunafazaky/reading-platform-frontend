@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createWork } from "@/lib/work.api";
+import { uploadFile } from "@/lib/upload.api";
 import { ApiError } from "@/types/api";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +16,9 @@ import {
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { FileUploadField } from "@/components/file-upload-field";
+import { CategorySelect } from "@/components/category-select";
+
 // Creates a new work. No styling — just the fields, submit state, and
 // error handling needed to confirm the create flow works end to end.
 export function WorkFormWrite() {
@@ -25,13 +29,14 @@ export function WorkFormWrite() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
-  // Optional fields. "categories" is typed as a single comma-separated
-  // string here since that's simpler for a plain <Input>, and split into
-  // an array right before submitting.
-  const [cover, setCover] = useState("");
-  const [categoriesInput, setCategoriesInput] = useState("");
+  // Optional fields. "coverFile"/"attachmentFile" hold the picked-but-
+  // not-yet-uploaded File objects — FileUploadField only validates and
+  // previews them locally. The actual upload to R2 happens once, inside
+  // handleSubmit below, right before publishing.
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
   const [attachmentTitle, setAttachmentTitle] = useState("");
-  const [attachmentLink, setAttachmentLink] = useState("");
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -54,25 +59,28 @@ export function WorkFormWrite() {
     setIsSubmitting(true);
 
     try {
-      const categories = categoriesInput
-        .split(",")
-        .map((category) => category.trim())
-        .filter(Boolean);
+      // Upload whatever files were picked, right now — this is the only
+      // place an actual upload happens, so re-picking a file multiple
+      // times before clicking Publish never uploads more than this final
+      // choice.
+      const coverUrl = coverFile ? (await uploadFile(coverFile, "cover")).url : "";
+      const attachmentUrl = attachmentFile
+        ? (await uploadFile(attachmentFile, "attachment")).url
+        : "";
 
-      const hasAttachment =
-        attachmentTitle.trim() !== "" || attachmentLink.trim() !== "";
+      const hasAttachment = attachmentTitle.trim() !== "" || attachmentUrl !== "";
 
       const { work } = await createWork(
         {
           title,
           body,
-          ...(cover.trim() ? { cover: cover.trim() } : {}),
+          ...(coverUrl ? { cover: coverUrl } : {}),
           ...(categories.length > 0 ? { categories } : {}),
           ...(hasAttachment
             ? {
                 attachment: {
                   title: attachmentTitle.trim() || undefined,
-                  link: attachmentLink.trim() || undefined,
+                  link: attachmentUrl || undefined,
                 },
               }
             : {}),
@@ -85,6 +93,9 @@ export function WorkFormWrite() {
       // for why we don't reuse the "work" object this response returned.
       router.push(`/works/${work.id}/read`);
     } catch (err) {
+      // uploadFile() throws the same ApiError type as createWork(), so
+      // this one catch block handles a failed upload and a failed
+      // publish the same way.
       if (err instanceof ApiError) {
         setErrorMessage(err.message);
 
@@ -141,29 +152,27 @@ export function WorkFormWrite() {
             )}
           </Field>
           <Field>
-            <FieldLabel htmlFor="cover">Cover image URL (optional)</FieldLabel>
-            <Input
+            <FieldLabel htmlFor="cover">Cover image (optional)</FieldLabel>
+            <FileUploadField
               id="cover"
-              type="text"
-              value={cover}
-              onChange={(e) => setCover(e.target.value)}
+              kind="cover"
+              file={coverFile}
+              onFileChange={setCoverFile}
             />
             {fieldErrors.cover && (
-              <FieldDescription style={{ color: "red" }}>
+              <FieldDescription className="text-destructive">
                 {fieldErrors.cover}
               </FieldDescription>
             )}
           </Field>
           <Field>
             <FieldLabel htmlFor="categories">
-              Categories (optional, comma-separated)
+              Categories (optional)
             </FieldLabel>
-            <Input
+            <CategorySelect
               id="categories"
-              type="text"
-              placeholder="fiction, adventure"
-              value={categoriesInput}
-              onChange={(e) => setCategoriesInput(e.target.value)}
+              value={categories}
+              onChange={setCategories}
             />
           </Field>
           <Field>
@@ -179,18 +188,18 @@ export function WorkFormWrite() {
           </Field>
           <Field>
             <FieldLabel htmlFor="attachmentLink">
-              Attachment link (optional)
+              Attachment PDF (optional)
             </FieldLabel>
-            <Input
+            <FileUploadField
               id="attachmentLink"
-              type="text"
-              value={attachmentLink}
-              onChange={(e) => setAttachmentLink(e.target.value)}
+              kind="attachment"
+              file={attachmentFile}
+              onFileChange={setAttachmentFile}
             />
           </Field>
         </FieldGroup>
         {errorMessage && (
-          <FieldDescription style={{ color: "red" }}>
+          <FieldDescription className="text-destructive">
             {errorMessage}
           </FieldDescription>
         )}

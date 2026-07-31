@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { rateWork } from "@/lib/rating.api";
 import { ApiError } from "@/types/api";
-import { Star } from "lucide-react";
+import { StarFourIcon } from "@phosphor-icons/react";
 
 interface RatingInputProps {
   workId: string;
@@ -71,7 +71,7 @@ export function RatingInput({ workId, onRated }: RatingInputProps) {
             aria-label={`Rate ${score} out of 5`}
             className="cursor-pointer disabled:opacity-50"
           >
-            <Star
+            <StarFourIcon
               className={
                 selected !== null && score <= selected
                   ? "fill-amber-500 text-amber-500"

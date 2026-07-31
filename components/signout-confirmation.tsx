@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { LogOutIcon } from "lucide-react";
+import { SignOutIcon } from "@phosphor-icons/react";
 import { Button } from "./ui/button";
 
 // My Import
@@ -25,7 +25,7 @@ export function SignoutConfirmation() {
       <AlertDialogTrigger
         render={
           <Button className="w-full" variant={"destructive"}>
-            <LogOutIcon />
+            <SignOutIcon />
             Log out
           </Button>
         }

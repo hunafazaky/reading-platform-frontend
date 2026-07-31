@@ -80,7 +80,7 @@ export function WorkDeleteConfirmation({
           render={
             <Button
               variant={"ghost"}
-              className={"text-sm font-bold text-rose-800 cursor-pointer"}
+              className={"text-sm font-bold px-0 text-rose-800 cursor-pointer"}
             >
               Delete
             </Button>

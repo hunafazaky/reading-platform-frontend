@@ -15,23 +15,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+
 import {
-  House,
-  RotateCcwClock,
-  FolderBookmark,
-  Star,
-  UserRoundPen,
+  HouseIcon,
+  ClockCounterClockwiseIcon,
+  BookmarksIcon,
+  StarFourIcon,
+  FolderUserIcon,
   CameraIcon,
   FileTextIcon,
-  Settings2Icon,
-  CircleHelpIcon,
-  SearchIcon,
+  GearIcon,
+  InfoIcon,
+  MagnifyingGlassIcon,
   DatabaseIcon,
-  FileChartColumnIcon,
+  PresentationChartIcon,
   FileIcon,
-  SquareLibrary,
-  // RotateCcwClock
-} from "lucide-react";
+  BooksIcon,
+  // ClockCounterClockwiseIcon
+} from "@phosphor-icons/react";
 
 // My Import
 // import { useAuth } from "@/context/AuthContext";
@@ -51,27 +52,27 @@ const data = {
     {
       title: "Home",
       url: "/home",
-      icon: <House />,
+      icon: <HouseIcon />,
     },
     {
       title: "History",
       url: "/history",
-      icon: <RotateCcwClock />,
+      icon: <ClockCounterClockwiseIcon />,
     },
     {
       title: "Bookmarked",
       url: "/bookmarked",
-      icon: <FolderBookmark />,
+      icon: <BookmarksIcon />,
     },
     {
       title: "Scored",
       url: "/scored",
-      icon: <Star />,
+      icon: <StarFourIcon />,
     },
     {
       title: "Published",
       url: "/published",
-      icon: <UserRoundPen />,
+      icon: <FolderUserIcon />,
     },
   ],
   navClouds: [
@@ -126,17 +127,17 @@ const data = {
     {
       title: "Settings",
       url: "#",
-      icon: <Settings2Icon />,
+      icon: <GearIcon />,
     },
     {
       title: "Get Help",
       url: "#",
-      icon: <CircleHelpIcon />,
+      icon: <InfoIcon />,
     },
     {
       title: "Search",
       url: "#",
-      icon: <SearchIcon />,
+      icon: <MagnifyingGlassIcon />,
     },
   ],
   documents: [
@@ -148,7 +149,7 @@ const data = {
     {
       name: "Reports",
       url: "#",
-      icon: <FileChartColumnIcon />,
+      icon: <PresentationChartIcon />,
     },
     {
       name: "Word Assistant",
@@ -167,10 +168,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <Link href={"/home"}>
-              <SidebarMenuButton
-                className="data-[slot=sidebar-menu-button]:p-1.5!"
-              >
-                <SquareLibrary className="size-5!" />
+              <SidebarMenuButton className="data-[slot=sidebar-menu-button]:p-1.5!">
+                <BooksIcon className="size-5!" />
                 <span className="text-base font-semibold">
                   Reading Platform
                 </span>

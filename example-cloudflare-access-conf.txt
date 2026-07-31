@@ -1,0 +1,9 @@
+# Use this token for authenticating against the Cloudflare API
+Token value: cfat_abcd...
+
+# Use the following credentials for S3 clients:
+Access Key ID: e26cabcd...
+Secret Access Key: a5bdabcd...
+
+# Use jurisdiction-specific endpoints for S3 clients:
+https://0d53abcd.r2.cloudflarestorage.com

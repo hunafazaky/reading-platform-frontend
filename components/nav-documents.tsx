@@ -17,11 +17,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  MoreHorizontalIcon,
+  DotsThreeIcon,
   FolderIcon,
   ShareIcon,
-  Trash2Icon,
-} from "lucide-react";
+  TrashIcon,
+} from "@phosphor-icons/react";
 
 export function NavDocuments({
   items,
@@ -52,7 +52,7 @@ export function NavDocuments({
                   />
                 }
               >
-                <MoreHorizontalIcon />
+                <DotsThreeIcon />
                 <span className="sr-only">More</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -70,7 +70,7 @@ export function NavDocuments({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
-                  <Trash2Icon />
+                  <TrashIcon />
                   <span>Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -79,7 +79,7 @@ export function NavDocuments({
         ))}
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontalIcon className="text-sidebar-foreground/70" />
+            <DotsThreeIcon className="text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
         </SidebarMenuItem>

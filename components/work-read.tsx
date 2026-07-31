@@ -5,7 +5,7 @@ import Image from "next/image";
 import { WorkDeleteConfirmation } from "./work-delete-confirmation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ImageOff } from "lucide-react";
+import { ImageBrokenIcon, StarFourIcon } from "@phosphor-icons/react";
 import { useWorkRatingSummary } from "@/hooks/use-work-rating-summary";
 import { RatingInput } from "@/components/rating-input";
 
@@ -18,48 +18,95 @@ export function WorkRead({
   isOwner: boolean;
   onDeleted?: () => void;
 }) {
-  const { averageRating, refetch: refetchRatingSummary } =
-    useWorkRatingSummary(data.id);
+  const { averageRating, refetch: refetchRatingSummary } = useWorkRatingSummary(
+    data.id,
+  );
 
   return (
-    <article className="flex flex-col gap-4 lg:w-2/3  m-auto">
+    <article className="flex flex-col gap-4 lg:w-2/3 m-auto min-h-dvh">
       <section>
-        <h1 className="text-4xl font-bold m-auto">{data.title}</h1>
-        <span className="m-auto">By {data.writer.pen_name}</span>
+        <h1 className="text-4xl text-center font-bold pb-8 my-4 border-b-2 border-foreground">
+          {data.title}
+        </h1>
         <div className="flex justify-between">
-          <div>
-            Categories:{" "}
-            {data.categories.length > 0 ? data.categories.join(", ") : "None"}
+          <div className="flex items-center">
+            <span className="text-sm font-bold uppercase mr-1">Writer:</span>
+            {data.writer.pen_name}
           </div>
-          <div>
-            {data.reader_count} readers · {data.rating_count} ratings
-            {averageRating !== null && ` · ${averageRating.toFixed(1)} avg`}
+          <div className="flex gap-4">
+            <div className="flex items-center">
+              <span className="text-sm font-bold uppercase mr-1">Readers:</span>
+              <span>{data.reader_count}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm font-bold uppercase mr-1">
+                Avg. Ratings:
+              </span>
+              <span className="flex justify-center items-center">
+                {averageRating}
+                <StarFourIcon weight="fill" className="text-amber-500" />
+              </span>
+              {/* <span className="flex justify-center items-center">
+                {averageRating !== null && averageRating > 0
+                  ? Array.from({ length: averageRating }).map((_, index) => (
+                      <StarFourIcon key={index} />
+                    ))
+                  : Array.from({ length: 5 }).map((_, index) => (
+                      <StarFourIcon key={index} />
+                    ))}
+              </span> */}
+            </div>
           </div>
         </div>
         {data.cover ? (
-          <Image width={100} height={100} src={data.cover} alt={data.title} />
+          <div className="w-full bg-secondary flex justify-center items-center aspect-video relative border-8 my-2 border-foreground rounded">
+            <Image
+              placeholder="empty"
+              loading="eager"
+              fill
+              src={data.cover}
+              alt={data.title}
+              className=" object-cover"
+            />
+          </div>
         ) : (
-          <div className="w-full bg-secondary flex justify-center items-center aspect-video">
-            <ImageOff size={50} />
+          <div className="w-full bg-secondary flex justify-center items-center aspect-video relative border-8 my-2 border-foreground rounded">
+            <ImageBrokenIcon size={50} />
           </div>
         )}
+        <div className="flex items-center">
+          <span className="text-sm font-bold uppercase mr-1">Categories:</span>
+          <span>
+            {data.categories.length > 0
+              ? data.categories.map((category, index) => (
+                  <Button variant="link" className="m-0 p-0" key={index}>
+                    #{category}
+                  </Button>
+                ))
+              : "-"}
+          </span>
+        </div>
       </section>
       <section>
-        <p className="text-xl">{data.body}</p>
+        <p className="text-2xl pb-8 border-b-2 border-foreground">
+          {data.body}
+        </p>
+      </section>
+      <section className="flex justify-between mb-80">
         {data.attachment?.link && (
-          <p>
-            Attachment:{" "}
-            <a href={data.attachment.link} target="_blank" rel="noreferrer">
-              {data.attachment.title || data.attachment.link}
-            </a>
-          </p>
+          <div className="flex items-center">
+            <span className="text-sm font-bold uppercase mr-1">
+              Attachment:
+            </span>
+            <Link href={data.attachment.link} target="_blank" rel="noreferrer">
+              <Button variant="link" className="m-0 p-0 cursor-pointer">
+                #{data.attachment.title || data.attachment.link}
+              </Button>
+            </Link>
+          </div>
         )}
-      </section>
-      <section>
-        <RatingInput workId={data.id} onRated={refetchRatingSummary} />
-      </section>
-      <section className="flex justify-end">
-        {isOwner && (
+
+        {isOwner ? (
           <div>
             <Link href={`/works/${data.id}/edit`}>
               <Button
@@ -75,6 +122,10 @@ export function WorkRead({
               onDeleted={onDeleted}
             />
           </div>
+        ) : (
+          <section>
+            <RatingInput workId={data.id} onRated={refetchRatingSummary} />
+          </section>
         )}
       </section>
     </article>

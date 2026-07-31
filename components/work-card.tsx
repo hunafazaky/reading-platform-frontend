@@ -12,7 +12,7 @@ import {
 import { Work } from "@/types/work";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { BookmarkIcon, BookmarkSimpleIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/context/AuthContext";
 import { useBookmarkToggle } from "@/hooks/use-bookmark-toggle";
 
@@ -44,7 +44,7 @@ export function WorkCard({
   );
 
   return (
-    <Card className="bg-accent text-primary pb-0">
+    <Card className="bg-accent pb-0">
       <CardHeader>
         <CardTitle className="text-base font-bold truncate">
           <Link href={`/works/${data.id}/read`} className="truncate">
@@ -66,9 +66,9 @@ export function WorkCard({
               className="cursor-pointer disabled:opacity-50"
             >
               {bookmarked ? (
-                <BookmarkCheck className="text-sky-800" />
+                <BookmarkSimpleIcon className="text-sky-800" size={24} weight="fill"/>
               ) : (
-                <Bookmark />
+                <BookmarkIcon size={24}/>
               )}
             </button>
           </CardAction>
@@ -81,17 +81,17 @@ export function WorkCard({
         <Link href={`/works/${data.id}/read`}>
           <Button
             variant={"ghost"}
-            className={"text-sm font-bold text-green-800 cursor-pointer"}
+            className={"text-sm font-bold px-0 text-green-800 cursor-pointer"}
           >
             Read
           </Button>
         </Link>
         {isOwner && (
-          <div>
+          <div className="flex gap-4">
             <Link href={`/works/${data.id}/edit`}>
               <Button
                 variant={"ghost"}
-                className={"text-sm font-bold text-amber-800 cursor-pointer"}
+                className={"text-sm font-bold px-0 text-amber-800 cursor-pointer"}
               >
                 Edit
               </Button>

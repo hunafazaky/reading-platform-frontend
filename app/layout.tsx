@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/context/AuthContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
+const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My App",
-  description: "Built by Hunafa Zaky",
+  title: "Reading Platform",
+  description: "Created by Hunafa Zaky",
 };
 
 export default function RootLayout({

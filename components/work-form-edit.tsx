@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { updateWork } from "@/lib/work.api";
+import { uploadFile } from "@/lib/upload.api";
 import { ApiError } from "@/types/api";
 import { Work } from "@/types/work";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ import {
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { FileUploadField } from "@/components/file-upload-field";
+import { CategorySelect } from "@/components/category-select";
 
 interface WorkEditFormProps {
   work: Work;
@@ -29,15 +32,19 @@ export function WorkFormEdit({ work }: WorkEditFormProps) {
 
   const [title, setTitle] = useState(work.title);
   const [body, setBody] = useState(work.body);
-  const [cover, setCover] = useState(work.cover ?? "");
-  const [categoriesInput, setCategoriesInput] = useState(
-    work.categories.join(", "),
-  );
+
+  // "coverFile"/"attachmentFile" hold a newly picked replacement, if any
+  // — nothing is uploaded until submit. If the user doesn't pick a
+  // replacement, we fall back to the work's existing URLs (below) so
+  // editing other fields doesn't accidentally clear the cover/attachment.
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [existingCover] = useState(work.cover ?? "");
+  const [existingAttachmentLink] = useState(work.attachment?.link ?? "");
+
+  const [categories, setCategories] = useState<string[]>(work.categories);
   const [attachmentTitle, setAttachmentTitle] = useState(
     work.attachment?.title ?? "",
-  );
-  const [attachmentLink, setAttachmentLink] = useState(
-    work.attachment?.link ?? "",
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,13 +64,19 @@ export function WorkFormEdit({ work }: WorkEditFormProps) {
     setIsSubmitting(true);
 
     try {
-      const categories = categoriesInput
-        .split(",")
-        .map((category) => category.trim())
-        .filter(Boolean);
+      // Only upload if the user actually picked a replacement file — the
+      // only place an actual upload happens, so re-picking a file
+      // multiple times before saving never uploads more than this final
+      // choice. Otherwise, keep whatever was already there.
+      const coverUrl = coverFile
+        ? (await uploadFile(coverFile, "cover")).url
+        : existingCover;
+      const attachmentUrl = attachmentFile
+        ? (await uploadFile(attachmentFile, "attachment")).url
+        : existingAttachmentLink;
 
       const hasAttachment =
-        attachmentTitle.trim() !== "" || attachmentLink.trim() !== "";
+        attachmentTitle.trim() !== "" || attachmentUrl !== "";
 
       const { work: updated } = await updateWork(
         work.id,
@@ -72,13 +85,13 @@ export function WorkFormEdit({ work }: WorkEditFormProps) {
           body,
           // Sending "" (not omitting) lets the user intentionally clear
           // the cover — the backend accepts an empty string for it.
-          cover: cover.trim(),
+          cover: coverUrl,
           categories,
           ...(hasAttachment
             ? {
                 attachment: {
                   title: attachmentTitle.trim() || undefined,
-                  link: attachmentLink.trim() || undefined,
+                  link: attachmentUrl || undefined,
                 },
               }
             : {}),
@@ -91,6 +104,9 @@ export function WorkFormEdit({ work }: WorkEditFormProps) {
       // its "writer" field is just an id string here, not populated.
       router.push(`/works/${updated.id}/read`);
     } catch (err) {
+      // uploadFile() throws the same ApiError type as updateWork(), so
+      // this one catch block handles a failed upload and a failed save
+      // the same way.
       if (err instanceof ApiError) {
         setErrorMessage(err.message);
 
@@ -145,29 +161,28 @@ export function WorkFormEdit({ work }: WorkEditFormProps) {
             )}
           </Field>
           <Field>
-            <FieldLabel htmlFor="cover">Cover image URL (optional)</FieldLabel>
-            <Input
+            <FieldLabel htmlFor="cover">Cover image (optional)</FieldLabel>
+            <FileUploadField
               id="cover"
-              type="text"
-              value={cover}
-              onChange={(e) => setCover(e.target.value)}
+              kind="cover"
+              file={coverFile}
+              onFileChange={setCoverFile}
+              existingUrl={existingCover}
             />
             {fieldErrors.cover && (
-              <FieldDescription style={{ color: "red" }}>
+              <FieldDescription className="text-destructive">
                 {fieldErrors.cover}
               </FieldDescription>
             )}
           </Field>
           <Field>
             <FieldLabel htmlFor="categories">
-              Categories (optional, comma-separated)
+              Categories (optional)
             </FieldLabel>
-            <Input
+            <CategorySelect
               id="categories"
-              type="text"
-              placeholder="fiction, adventure"
-              value={categoriesInput}
-              onChange={(e) => setCategoriesInput(e.target.value)}
+              value={categories}
+              onChange={setCategories}
             />
           </Field>
           <Field>
@@ -183,18 +198,19 @@ export function WorkFormEdit({ work }: WorkEditFormProps) {
           </Field>
           <Field>
             <FieldLabel htmlFor="attachmentLink">
-              Attachment link (optional)
+              Attachment PDF (optional)
             </FieldLabel>
-            <Input
+            <FileUploadField
               id="attachmentLink"
-              type="text"
-              value={attachmentLink}
-              onChange={(e) => setAttachmentLink(e.target.value)}
+              kind="attachment"
+              file={attachmentFile}
+              onFileChange={setAttachmentFile}
+              existingUrl={existingAttachmentLink}
             />
           </Field>
         </FieldGroup>
         {errorMessage && (
-          <FieldDescription style={{ color: "red" }}>
+          <FieldDescription className="text-destructive">
             {errorMessage}
           </FieldDescription>
         )}

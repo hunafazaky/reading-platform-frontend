@@ -16,12 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  EllipsisVerticalIcon,
-  // CircleUserRoundIcon,
-  // CreditCardIcon,
-  // BellIcon,
-} from "lucide-react";
+import { DotsThreeOutlineVerticalIcon } from "@phosphor-icons/react";
 
 // My Import
 // import { User } from "@/types/user";
@@ -80,7 +75,7 @@ export function NavUser() {
                   {user ? user.email : guestUser.email}
                 </span>
               </div>
-              <EllipsisVerticalIcon className="ml-auto size-4" />
+              <DotsThreeOutlineVerticalIcon className="ml-auto size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="min-w-56"
