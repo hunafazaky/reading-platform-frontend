@@ -5,9 +5,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  // DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuItem,
+  // DropdownMenuLabel,
+  // DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -16,13 +16,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { DotsThreeOutlineVerticalIcon } from "@phosphor-icons/react";
+import {
+  DotsThreeOutlineVerticalIcon,
+  SignInIcon,
+  UserCirclePlusIcon,
+} from "@phosphor-icons/react";
 
 // My Import
 // import { User } from "@/types/user";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SignoutConfirmation } from "./signout-confirmation";
+import Link from "next/link";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -65,7 +70,7 @@ export function NavUser() {
                   src={user ? user.photo : guestUser.photo}
                   alt={user ? user.pen_name : guestUser.pen_name}
                 />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">RP</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
@@ -84,14 +89,14 @@ export function NavUser() {
               sideOffset={4}
             >
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="p-0 font-normal">
+                {/* <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="size-8">
                       <AvatarImage
                         src={user ? user.photo : guestUser.photo}
                         alt={user ? user.pen_name : guestUser.pen_name}
                       />
-                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                      <AvatarFallback className="rounded-lg">RP</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-medium">
@@ -102,10 +107,10 @@ export function NavUser() {
                       </span>
                     </div>
                   </div>
-                </DropdownMenuLabel>
+                </DropdownMenuLabel> */}
               </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              {/* <DropdownMenuGroup>
+              {/* <DropdownMenuSeparator />
+              <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <CircleUserRoundIcon />
                   Account
@@ -118,9 +123,26 @@ export function NavUser() {
                   <BellIcon />
                   Notifications
                 </DropdownMenuItem>
-              </DropdownMenuGroup> */}
-              {/* <DropdownMenuSeparator /> */}
-              <SignoutConfirmation />
+                </DropdownMenuGroup>
+              <DropdownMenuSeparator /> */}
+              {user ? (
+                <SignoutConfirmation />
+              ) : (
+                <DropdownMenuGroup>
+                  <Link href="/auth/signup">
+                    <DropdownMenuItem>
+                      <UserCirclePlusIcon />
+                      Sign Up
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/auth/signin">
+                    <DropdownMenuItem>
+                      <SignInIcon />
+                      Sign In
+                    </DropdownMenuItem>
+                  </Link>
+                </DropdownMenuGroup>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>

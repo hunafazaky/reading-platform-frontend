@@ -35,7 +35,7 @@ import {
 } from "@phosphor-icons/react";
 
 // My Import
-// import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
 const data = {
@@ -160,7 +160,7 @@ const data = {
 };
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // My Const
-  // const { user, isLoading, signout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -179,9 +179,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} /> */}
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {user && (
+          <section>
+            <NavMain items={data.navMain} />
+            {/* <NavDocuments items={data.documents} /> */}
+            <NavSecondary items={data.navSecondary} className="mt-auto" />
+          </section>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
