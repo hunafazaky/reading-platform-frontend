@@ -3,6 +3,7 @@
 A modern reading and writing platform built with Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui components.
 
 - **Live Demo:** https://hz-reading-platform.vercel.app/
+- **API Documentation:** https://hz-reading-platform.onrender.com/api-docs/
 - **Project:** User-authenticated reading dashboard with works management, bookmarking, history, publishing, rating, and file upload support.
 
 ## Key Features
