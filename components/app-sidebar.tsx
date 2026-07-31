@@ -169,7 +169,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <Link href={"/home"}>
               <SidebarMenuButton className="data-[slot=sidebar-menu-button]:p-1.5!">
-                <BooksIcon className="size-5!" />
+                <BooksIcon className="size-5!" color="#00598a" weight="fill" />
                 <span className="text-base font-semibold">
                   Reading Platform
                 </span>
@@ -180,11 +180,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         {user && (
-          <section>
+          <>
             <NavMain items={data.navMain} />
             {/* <NavDocuments items={data.documents} /> */}
             <NavSecondary items={data.navSecondary} className="mt-auto" />
-          </section>
+          </>
         )}
       </SidebarContent>
       <SidebarFooter>

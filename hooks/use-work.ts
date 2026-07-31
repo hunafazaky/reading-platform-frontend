@@ -24,7 +24,7 @@ interface UseWorkResult {
 // and (if signed in) records reading history on the backend — that
 // happens automatically as a side effect of viewing the work.
 export function useWork(id: string): UseWorkResult {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
 
   const [work, setWork] = useState<Work | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,25 +48,29 @@ export function useWork(id: string): UseWorkResult {
     }
   }, [id, accessToken]);
 
-  // Remembers which (id, accessToken) pair we've already auto-fetched, so
-  // React Strict Mode's dev-only "mount, cleanup, mount again" behavior
-  // doesn't fire this request twice. That matters here specifically
-  // because this GET request isn't side-effect-free — the backend
-  // increments reader_count on every call.
+  // Remembers which (id, user) pair we've already auto-fetched, so React
+  // Strict Mode's dev-only "mount, cleanup, mount again" behavior doesn't
+  // fire this request twice, AND so a silent background access-token
+  // refresh (see lib/api.ts's apiFetch) doesn't trigger an unwanted extra
+  // fetch — a refresh changes "accessToken" but not who's actually signed
+  // in. That distinction matters here specifically because this GET
+  // request isn't side-effect-free — the backend increments reader_count
+  // on every call, so an unnecessary refetch would inflate it.
   //
-  // accessToken is part of the key (not just id) so that signing in while
-  // already viewing a work still triggers a real refetch — the backend
-  // only records reading history when a token is sent. (This guard only
-  // affects the automatic fetch-on-mount below; calling refetch()
-  // manually, e.g. from a "Try again" button, always fetches for real.)
+  // Keying on the user's id (rather than the token itself) still lets a
+  // genuine sign-in/sign-out trigger a real refetch — needed since the
+  // backend only records reading history when a token is sent. (This
+  // guard only affects the automatic fetch-on-mount below; calling
+  // refetch() manually, e.g. from a "Try again" button, always fetches
+  // for real.)
   const autoFetchedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const fetchKey = `${id}:${accessToken ?? ""}`;
+    const fetchKey = `${id}:${user?.id ?? ""}`;
     if (autoFetchedKeyRef.current === fetchKey) return;
     autoFetchedKeyRef.current = fetchKey;
     fetchWork();
-  }, [id, accessToken, fetchWork]);
+  }, [id, user?.id, fetchWork]);
 
   return { work, isLoading, error, refetch: fetchWork, setWork };
 }

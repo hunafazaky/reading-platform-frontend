@@ -17,6 +17,7 @@ import {
 import { getUserById } from "@/lib/user.api";
 import { decodeJwtPayload } from "@/lib/jwt";
 import { ApiError } from "@/types/api";
+import { registerAuthRefreshHandlers } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 interface AuthContextValue {
@@ -72,6 +73,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
+  // ==================================================
+  // Let lib/api.ts's apiFetch() reach back into this context.
+  //
+  // apiFetch is a plain function, not a component — it can't call
+  // setAccessToken/setUser directly. So it calls these two functions
+  // instead (registered once, here), which do have access to this
+  // component's real state. This is what makes a silent, mid-request
+  // token refresh (see lib/api.ts) actually keep the rest of the app in
+  // sync afterwards — e.g. the next request made anywhere else in the
+  // app already uses the fresh token, and the user never sees anything.
+  // ==================================================
+  useEffect(() => {
+    registerAuthRefreshHandlers({
+      onTokenRefreshed: (newToken) => {
+        setAccessToken(newToken);
+      },
+      onRefreshFailed: () => {
+        // The refresh cookie itself is gone or expired too — there's no
+        // session left to recover, so reflect that honestly rather than
+        // silently pretending everything's fine.
+        setAccessToken(null);
+        setUser(null);
+      },
+    });
+  }, []);
 
   // ==================================================
   // On first load, try to silently restore the session.

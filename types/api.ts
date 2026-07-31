@@ -1,4 +1,4 @@
-// The backend returns errors in two slightly different shapes:
+// The backend returns errors in a few slightly different shapes:
 //
 // 1. Validation errors (from validationMiddleware.js):
 //    { success: false, message: "Data validation error.", details: [{ field, message }] }
@@ -6,11 +6,18 @@
 // 2. Generic errors (from the error handler in server.js):
 //    { success: false, statusCode, message }
 //
-// This type covers both, with the extra fields optional.
+// 3. Expired access token (from authMiddleware.js):
+//    { message: "Sesi telah berakhir...", code: "TOKEN_EXPIRED" }
+//    (no "success" field on this one) — apiFetch() in lib/api.ts checks
+//    for this "code" specifically to trigger a silent refresh-and-retry,
+//    rather than showing it as an error.
+//
+// This type covers all three, with the varying fields optional.
 export interface ApiErrorResponse {
-  success: false;
+  success?: false;
   message: string;
   statusCode?: number;
+  code?: string;
   details?: { field: string; message: string }[];
 }
 
